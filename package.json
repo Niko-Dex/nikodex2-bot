@@ -18,6 +18,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "discord.js": "^14.22.1",
+    "dotenv": "^17.2.1",
     "typescript": "^5.9.2"
   }
 }
