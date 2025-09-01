@@ -1,0 +1,23 @@
+{
+  "name": "nikodex2-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for the NikoDexV2",
+  "homepage": "https://github.com/Niko-Dex/nikodex2-bot#readme",
+  "bugs": {
+    "url": "https://github.com/Niko-Dex/nikodex2-bot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Niko-Dex/nikodex2-bot.git"
+  },
+  "license": "ISC",
+  "author": "NikoDex",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "typescript": "^5.9.2"
+  }
+}
