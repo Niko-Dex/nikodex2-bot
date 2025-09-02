@@ -1,11 +1,15 @@
 module.exports = {
-    async isValidDiscordUser(discord_token) {
+    async getDiscordUser(discord_token) {
         const disc = await fetch('https://discord.com/api/users/@me', {
             headers: {
                 authorization: `Bearer ${discord_token}`
             }
         })
 
-        return disc.ok
+        if (disc.ok) {
+            return await disc.json()
+        } else {
+            return null
+        }
     }
 }

@@ -8,7 +8,7 @@ const token = process.env.DISCORD_TOKEN
 const express = require('express')
 const cors = require('cors')
 const formidable = require('express-formidable');
-const { isValidDiscordUser } = require('./helper');
+const { getDiscordUser } = require('./helper');
 
 const app = express()
 app.use(cors())
@@ -60,9 +60,10 @@ app.post('/msg', (req, res) => {
     res.send('Sent message to discord channel');
 })
 
-app.post('/upload', (req, res) => {
+app.post('/upload', async (req, res) => {
     const token = req.headers.authorization ?? ""
-    if (!isValidDiscordUser(token)) {
+    const user = await getDiscordUser(token)
+    if (!user) {
         res.status(401).send(JSON.stringify({ msg: `Unauthenticated!` }))
     }
 
@@ -82,7 +83,7 @@ app.post('/upload', (req, res) => {
         let embed = new EmbedBuilder()
             .setTitle(`Submission: ${req.fields['name']}`)
             .setDescription(`${req.fields['description']}`)
-            .addFields({ name: 'Author', value: `${req.fields['author']}` })
+            .addFields({ name: 'Author', value: `${user['username']} (${user['id']})` })
             .addFields({ name: 'Full Description', value: `${req.fields['full_desc']}` })
             .setImage(`attachment://${originalFileName}`)
 
@@ -91,7 +92,7 @@ app.post('/upload', (req, res) => {
         client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
         .send({ embeds: [embed], files: [file] })
 
-        client.users.fetch(req.fields['author_id'])
+        client.users.fetch(user['id'])
         .then(async u => {
             await u.createDM(true)
             await u.dmChannel.send(`Your nikosona submission was sent: ${req.fields['name']}`)
