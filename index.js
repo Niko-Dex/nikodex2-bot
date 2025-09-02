@@ -3,7 +3,9 @@ dotenv.config();
 const fs = require('node:fs')
 const path = require('node:path')
 
-const { Client, Events, GatewayIntentBits, MessageFlags, Collection, EmbedBuilder, AttachmentBuilder } = require('discord.js')
+const { Client, Events, GatewayIntentBits, MessageFlags, Collection, 
+    EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, 
+    ButtonStyle} = require('discord.js')
 const token = process.env.DISCORD_TOKEN
 const express = require('express')
 const cors = require('cors')
@@ -13,10 +15,12 @@ const { isValidDiscordUser } = require('./helper');
 const app = express()
 app.use(cors())
 app.use(formidable())
-const port = 3000
+const port = process.env.PORT
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
+
+const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolder = fs.readdirSync(foldersPath);
@@ -51,13 +55,7 @@ client.on(Events.InteractionCreate, async interaction => {
 })
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-
-app.post('/msg', (req, res) => {
-    client.channels.cache.get('1408078874213875726')
-    .send('If you are seeing this then i successfully sent a msg because of a POST to localhost:3000/msg');
-    res.send('Sent message to discord channel');
+    res.send('The NikodexV2 discord bot is running on this port. This is NOT the frontend!')
 })
 
 app.post('/upload', (req, res) => {
@@ -88,8 +86,44 @@ app.post('/upload', (req, res) => {
 
         embed = embed.addFields(abilitiesFields);
 
+        const acceptButton = new ButtonBuilder()
+            .setCustomId("accept")
+            .setLabel("Accept")
+            .setStyle(ButtonStyle.Success)
+        
+        const denyButton = new ButtonBuilder()
+            .setCustomId("deny")
+            .setLabel("Deny")
+            .setStyle(ButtonStyle.Danger)
+
+        const actionRow = new ActionRowBuilder()
+            .addComponents(acceptButton, denyButton)
+
         client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
-        .send({ embeds: [embed], files: [file] })
+        .send({ embeds: [embed], files: [file], components: [actionRow] })
+        .then(message => {
+            const filter = (interaction) => adminIdList.includes(interaction.user.id);
+            message.awaitMessageComponent({ filter, time: 65_000 })
+                .then(async interaction => {
+                    if (interaction.customId === 'accept') {
+                        client.users.fetch(req.fields['author_id'])
+                        .then(async u => {
+                            await u.createDM(true)
+                            await u.dmChannel.send(`Your nikosona was accepted: ${req.fields['name']}`)
+                        })
+                        await interaction.update({ content: 'This niko was accepted!', components: [] })
+                    }
+                    else if (interaction.customId === 'deny') {
+                        client.users.fetch(req.fields['author_id'])
+                        .then(async u => {
+                            await u.createDM(true)
+                            await u.dmChannel.send(`Your nikosona was denied: ${req.fields['name']}`)
+                        })
+                        await interaction.update({ content: 'This niko was denied!', components: [] })
+                    }
+                })
+                .catch(console.error);
+        })
 
         client.users.fetch(req.fields['author_id'])
         .then(async u => {
