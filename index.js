@@ -104,7 +104,7 @@ app.post('/upload', async (req, res) => {
         .send({ embeds: [embed], files: [file], components: [actionRow] })
         .then(message => {
             const filter = (interaction) => adminIdList.includes(interaction.user.id);
-            message.awaitMessageComponent({ filter, time: 65_000 })
+            message.awaitMessageComponent({ filter, time: 7 * 24 * 60 * 60 * 1000 })
                 .then(async interaction => {
                     if (interaction.customId === 'accept') {
                         client.users.fetch(user['id'])
