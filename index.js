@@ -8,6 +8,7 @@ const token = process.env.DISCORD_TOKEN
 const express = require('express')
 const cors = require('cors')
 const formidable = require('express-formidable');
+const { isValidDiscordUser } = require('./helper');
 
 const app = express()
 app.use(cors())
@@ -60,6 +61,11 @@ app.post('/msg', (req, res) => {
 })
 
 app.post('/upload', (req, res) => {
+    const token = req.headers.authorization ?? ""
+    if (!isValidDiscordUser(token)) {
+        res.status(401).send(JSON.stringify({ msg: `Unauthenticated!` }))
+    }
+
     const abilities = req.fields['abilities'].split('|||');
     console.log(abilities);
 
