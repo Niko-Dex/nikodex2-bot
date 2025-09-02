@@ -107,7 +107,7 @@ app.post('/upload', async (req, res) => {
             message.awaitMessageComponent({ filter, time: 65_000 })
                 .then(async interaction => {
                     if (interaction.customId === 'accept') {
-                        client.users.fetch(req.fields['author_id'])
+                        client.users.fetch(user['id'])
                         .then(async u => {
                             await u.createDM(true)
                             await u.dmChannel.send(`Your nikosona was accepted: ${req.fields['name']}`)
@@ -115,7 +115,7 @@ app.post('/upload', async (req, res) => {
                         await interaction.update({ content: 'This niko was accepted!', components: [] })
                     }
                     else if (interaction.customId === 'deny') {
-                        client.users.fetch(req.fields['author_id'])
+                        client.users.fetch(user['id'])
                         .then(async u => {
                             await u.createDM(true)
                             await u.dmChannel.send(`Your nikosona was denied: ${req.fields['name']}`)
