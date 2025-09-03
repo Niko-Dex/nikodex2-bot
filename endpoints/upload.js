@@ -1,7 +1,5 @@
 const { getDiscordUser } = require('../helper');
-const { Client, Events, GatewayIntentBits, MessageFlags, Collection, 
-    EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, 
-    ButtonStyle} = require('discord.js')
+const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle} = require('discord.js')
 const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 
 async function upload(req, res, client) {
@@ -15,7 +13,7 @@ async function upload(req, res, client) {
     console.log(abilities);
 
     let abilitiesFields = []
-    if (req.fields['abilities']) { 
+    if (req.fields['abilities']) {
         for (const element of abilities) {
             abilitiesFields.push({ name: 'Ability', value: element })
         }
@@ -39,7 +37,7 @@ async function upload(req, res, client) {
             .setCustomId("accept")
             .setLabel("Accept")
             .setStyle(ButtonStyle.Success)
-        
+
         const denyButton = new ButtonBuilder()
             .setCustomId("deny")
             .setLabel("Deny")
