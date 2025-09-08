@@ -6,7 +6,7 @@ async function upload(req, res, client) {
     const token = req.headers.authorization ?? ""
     const user = await getDiscordUser(token)
     if (!user) {
-        res.status(401).send(JSON.stringify({ msg: `Unauthenticated!` }))
+        res.status(401).send(JSON.stringify({ detail: `Unauthenticated!` }))
     }
 
     const abilities = req.fields['abilities'].split('|||');
@@ -80,7 +80,7 @@ async function upload(req, res, client) {
         .catch(e => console.log(e))
     } catch (error) {
         console.log(error)
-        res.status(400).send(JSON.stringify({ msg: `Error! ${error}` }))
+        res.status(400).send(JSON.stringify({ detail: `Error! ${error}` }))
     }
 
     res.send(JSON.stringify(req.fields));
