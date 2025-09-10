@@ -21,17 +21,19 @@ for (const file of commandFolder) {
 
 const rest = new REST().setToken(token);
 
-(async() => {
-    try {
-        console.log('Started refreshing slash commands');
+module.exports = {
+    async registerCommands() {
+        try {
+            console.log('Started refreshing slash commands');
 
-        const data = await rest.put(
-            Routes.applicationCommands(clientId),
-            { body: commands }
-        );
+            const data = await rest.put(
+                Routes.applicationCommands(clientId),
+                { body: commands }
+            );
 
-        console.log(`Successfully refreshed ${data.length} slash commands`);
-    } catch (error) {
-        console.error(error);
+            console.log(`Successfully refreshed ${data.length} slash commands`);
+        } catch (error) {
+            console.error(error);
+        }
     }
-})();
+}

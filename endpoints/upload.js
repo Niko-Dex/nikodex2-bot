@@ -1,7 +1,8 @@
 const sharp = require('sharp');
-const { getDiscordUser } = require('../helper');
+const { getDiscordUser, getSubmitUserInfo, postSubmitUserInfo } = require('../helper');
 const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client} = require('discord.js')
 const adminIdList = process.env.ADMIN_ID_LIST.split(';')
+const cooldown = 1 * 60 * 60 * 1000 // 1 hour / person
 
 /**
  * @param {string} str
@@ -71,6 +72,18 @@ async function upload(req, res, client) {
     if (!user) {
         res.status(401).send(JSON.stringify({ detail: `Unauthenticated!` }))
         return
+    }
+
+    const submitInfo = await getSubmitUserInfo(user["id"])
+    if (submitInfo) {
+        if (submitInfo["is_banned"]) {
+            res.status(403).send(JSON.stringify({ detail: `You've been banned with the reason: ${submitInfo["ban_reason"] ?? ""}` }))
+            return
+        }
+        if (submitInfo["last_submit_on"] + cooldown > Date.now()) {
+            res.status(429).send(JSON.stringify({ detail: "You've already sent a Niko! Please wait at least an hour before submitting." }))
+            return
+        }
     }
 
     const errMsg = await validateSubmit(req)
@@ -151,6 +164,12 @@ async function upload(req, res, client) {
         console.log(error)
         res.status(400).send(JSON.stringify({ detail: `Error! ${error}` }))
     }
+
+    await postSubmitUserInfo(user["id"], {
+        "last_submit_on": Date.now(),
+        "is_banned": false,
+        "ban_reason": "."
+    })
 
     res.status(200).send(JSON.stringify(req.fields));
 }

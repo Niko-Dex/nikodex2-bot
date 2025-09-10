@@ -9,6 +9,7 @@ const express = require('express')
 const cors = require('cors')
 const formidable = require('express-formidable');
 const { upload } = require('./endpoints/upload');
+const { registerCommands } = require('./deploy-commands');
 
 const app = express()
 app.use(cors())
@@ -17,6 +18,10 @@ const port = process.env.PORT
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
+
+client.on("clientReady", async () => {
+    await registerCommands()
+})
 
 const commandsFolder = path.join(__dirname, 'commands');
 const commands = fs.readdirSync(commandsFolder).filter(file => file.endsWith('.js'));
