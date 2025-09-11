@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags, EmbedBuilder } = require('discord.js');
 const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 const { getSubmitUserInfo, postSubmitUserInfo } = require("../helper")
 
@@ -51,13 +51,77 @@ module.exports = {
             return
         }
 
-        async function getInfo() {
-            const info = await getSubmitUserInfo(interaction.options.getString("user_id"))
-            if (!info) {
-                await interaction.reply("I don't know this user! (user not submitted on the webpage yet)")
-                return
+        const providedUserId = interaction.options.getString("user_id")
+        const userRes = await fetch(`https://discord.com/api/v9/users/${providedUserId}`, {
+            headers: {
+                Authorization: `Bot ${process.env["DISCORD_TOKEN"]}`
             }
-            await interaction.reply(`User ID: \`${info["user_id"]}\`\nLast submitted a Nikosona on: \`${new Date(info["last_submit_on"]).toString()}\`\nStatus: \`${info["is_banned"] ? "BANNED" : "not banned"}\`\nBan reason (if banned): \`${info["ban_reason"]}\``)
+        })
+
+        if (!userRes.ok) {
+            await interaction.reply({
+                content: "Unknown Discord user!",
+                flags: [ MessageFlags.Ephemeral ]
+            })
+            return
+        }
+
+        const userInfo = await userRes.json()
+
+        async function getInfo() {
+            const embed = new EmbedBuilder()
+                .setColor(userInfo["banner_color"])
+                .setTitle("User Info")
+                .setThumbnail(`https://cdn.discordapp.com/avatars/${userInfo["id"]}/${userInfo["avatar"]}.webp?size=1024`)
+                .addFields({
+                    name: "Username",
+                    value: `${userInfo["username"]}#${userInfo["discriminator"]}`,
+                    inline: true
+                })
+                .addFields({
+                    name: "Global Name",
+                    value: userInfo["global_name"],
+                    inline: true
+                })
+                .setTimestamp()
+                .setFooter({ text: 'kbity kbity kbity' })
+
+            const info = await getSubmitUserInfo(providedUserId)
+            if (!info) {
+                embed.addFields({
+                    name: "Submit status",
+                    value: "User has not submit entry yet.",
+                    inline: true
+                })
+            } else {
+                embed
+                    .addFields({
+                        name: "Submit status",
+                        value: "User has submitted an entry.",
+                        inline: true
+                    })
+                    .addFields({
+                        name: "Last submitted on",
+                        value: `<t:${info["last_submit_on"]}>`,
+                        inline: true
+                    })
+                    .addFields({
+                        name: "Is banned",
+                        value: info["is_banned"] ? "**yes**" : "nope",
+                        inline: true
+                    })
+
+                if (info["is_banned"]) {
+                    embed.addFields({
+                        name: "Ban reason",
+                        value: info["ban_reason"]
+                    })
+                }
+            }
+
+            await interaction.reply({
+                embeds: [embed]
+            })
         }
 
         async function ban() {

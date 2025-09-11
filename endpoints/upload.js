@@ -168,7 +168,7 @@ async function upload(req, res, client) {
     await postSubmitUserInfo(user["id"], {
         "last_submit_on": Date.now(),
         "is_banned": false,
-        "ban_reason": "."
+        "ban_reason": ""
     })
 
     res.status(200).send(JSON.stringify(req.fields));
