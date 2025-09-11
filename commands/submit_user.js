@@ -102,7 +102,7 @@ module.exports = {
                     })
                     .addFields({
                         name: "Last submitted on",
-                        value: `<t:${info["last_submit_on"]}>`,
+                        value: `<t:${Math.round(info["last_submit_on"] / 1000)}>`,
                         inline: true
                     })
                     .addFields({
