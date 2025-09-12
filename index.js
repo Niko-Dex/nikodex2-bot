@@ -3,7 +3,7 @@ dotenv.config();
 const fs = require('node:fs')
 const path = require('node:path')
 
-const { Client, GatewayIntentBits, Collection } = require('discord.js')
+const { Client, GatewayIntentBits, Collection, Events } = require('discord.js')
 const token = process.env.DISCORD_TOKEN
 const express = require('express')
 const cors = require('cors')

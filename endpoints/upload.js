@@ -5,7 +5,7 @@ const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 const cooldown = 1 * 60 * 60 * 1000 // 1 hour / person
 
 /**
- * @param {string} str
+ * @param {string | undefined} str
  * @returns {number}
  */
 function getStrLenInBytes(str) {
@@ -17,6 +17,8 @@ function getStrLenInBytes(str) {
  * @param {import("express").Request} req 
  */
 async function validateSubmit(req) {
+    if (!req.fields) return
+
     // validate name (max 120 bytes)
     if (getStrLenInBytes(req.fields["name"]) > 120) {
         return "Length for name exceeded 120 bytes!"
@@ -103,75 +105,64 @@ async function upload(req, res, client) {
 
     const originalFileName = req.files['files[0]'].name;
 
+    let file = new AttachmentBuilder(req.files['files[0]'].path);
+    file.setName(originalFileName)
+    let embed = new EmbedBuilder()
+        .setTitle(`Submission: ${req.fields['name']}`)
+        .setDescription(req.fields['full_desc'])
+        .addFields({ name: 'Author', value: `${user['username']} (${user['id']})` })
+        .addFields({ name: 'Short Description', value: `${req.fields['description']}` })
+        .setImage(`attachment://${originalFileName}`)
+
+    embed = embed.addFields(abilitiesFields);
+
+    const acceptButton = new ButtonBuilder()
+        .setCustomId("accept")
+        .setLabel("Accept")
+        .setStyle(ButtonStyle.Success)
+
+    const denyButton = new ButtonBuilder()
+        .setCustomId("deny")
+        .setLabel("Deny")
+        .setStyle(ButtonStyle.Danger)
+
+    const actionRow = new ActionRowBuilder()
+        .addComponents(acceptButton, denyButton)
+
     try {
-        let file = new AttachmentBuilder(req.files['files[0]'].path);
-        file.setName(originalFileName)
-        let embed = new EmbedBuilder()
-            .setTitle(`Submission: ${req.fields['name']}`)
-            .setDescription(req.fields['full_desc'])
-            .addFields({ name: 'Author', value: `${user['username']} (${user['id']})` })
-            .addFields({ name: 'Short Description', value: `${req.fields['description']}` })
-            .setImage(`attachment://${originalFileName}`)
-
-        embed = embed.addFields(abilitiesFields);
-
-        const acceptButton = new ButtonBuilder()
-            .setCustomId("accept")
-            .setLabel("Accept")
-            .setStyle(ButtonStyle.Success)
-
-        const denyButton = new ButtonBuilder()
-            .setCustomId("deny")
-            .setLabel("Deny")
-            .setStyle(ButtonStyle.Danger)
-
-        const actionRow = new ActionRowBuilder()
-            .addComponents(acceptButton, denyButton)
-
-        client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
-        .send({ embeds: [embed], files: [file], components: [actionRow] })
-        .then(message => {
-            const filter = (interaction) => adminIdList.includes(interaction.user.id);
-            message.awaitMessageComponent({ filter, time: 7 * 24 * 60 * 60 * 1000 })
-                .then(async interaction => {
-                    if (interaction.customId === 'accept') {
-                        client.users.fetch(user['id'])
-                        .then(async u => {
-                            await u.createDM(true)
-                            await u.dmChannel.send(`Your nikosona was accepted: ${req.fields['name']}`)
-                        })
-                        await interaction.update({ content: 'This niko was accepted!', components: [] })
-                    }
-                    else if (interaction.customId === 'deny') {
-                        client.users.fetch(user['id'])
-                        .then(async u => {
-                            await u.createDM(true)
-                            await u.dmChannel.send(`Your nikosona was denied: ${req.fields['name']}`)
-                        })
-                        await interaction.update({ content: 'This niko was denied!', components: [] })
-                    }
-                })
-                .catch(console.error);
+        const dmUser = await client.users.fetch(user['id'])
+        const sentEmbed = await client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
+            .send({ embeds: [embed], files: [file], components: [actionRow] })
+        await postSubmitUserInfo(user["id"], {
+            "last_submit_on": Date.now(),
+            "is_banned": false,
+            "ban_reason": ""
         })
 
-        client.users.fetch(user['id'])
-        .then(async u => {
-            await u.createDM(true)
-            await u.dmChannel.send(`Your nikosona submission was sent: ${req.fields['name']}`)
-        })
-        .catch(e => console.log(e))
-    } catch (error) {
-        console.log(error)
-        res.status(400).send(JSON.stringify({ detail: `Error! ${error}` }))
+        const filter = (interaction) => adminIdList.includes(interaction.user.id);
+        sentEmbed.awaitMessageComponent({ filter, time: 7 * 24 * 60 * 60 * 1000 })
+            .then(async componentInp => {
+                const accepted = componentInp.customId === 'accept'
+                await componentInp.update({ content: `This niko was ${accepted ? "accepted" : "denied"}!`, components: [] })
+                await dmUser.dmChannel.send(`Your nikosona was ${accepted ? "accepted" : "denied"}: ${req.fields['name']}`)
+            })
+            .catch(e => {
+                console.log(e)
+            })
+    } catch (e) {
+        console.log(e)
+        res.status(400).send(JSON.stringify({ detail: `Problem while submitting! ${e}` }))
     }
 
-    await postSubmitUserInfo(user["id"], {
-        "last_submit_on": Date.now(),
-        "is_banned": false,
-        "ban_reason": ""
-    })
-
-    res.status(200).send(JSON.stringify(req.fields));
+    try {
+        const dmUser = await client.users.fetch(user['id'])
+        await dmUser.createDM(true)
+        await dmUser.dmChannel.send(`Your Nikosona submission was sent: ${req.fields['name']}`)
+        res.status(200).send(JSON.stringify(req.fields));
+    } catch (e) {
+        console.log(e)
+        res.status(400).send(JSON.stringify({ detail: `Your Nikosona submission was sent, but you turned off DM, so we can't send you status about your submission!` }))
+    }
 }
 
 module.exports = {

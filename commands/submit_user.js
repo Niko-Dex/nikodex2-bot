@@ -37,6 +37,15 @@ module.exports = {
                 .setDescription("The user's ID")
                 .setRequired(true)
             )
+        )
+        .addSubcommand(s => s
+            .setName("clear_timeout")
+            .setDescription("Remove current timeout for a user (should only be use for testing purpose).")
+            .addStringOption(o => o
+                .setName("user_id")
+                .setDescription("The user's ID")
+                .setRequired(true)
+            )
         ),
     /**
      * 
@@ -125,24 +134,47 @@ module.exports = {
         }
 
         async function ban() {
-            const userId = interaction.options.getString("user_id")
+            const info = await getSubmitUserInfo(providedUserId)
+            let prevValue = {
+                last_submit_on: info ? info["last_submit_on"] : 0,
+            }
+
             const reason = interaction.options.getString("reason")
-            await postSubmitUserInfo(userId, {
-                last_submit_on: 0,
+            await postSubmitUserInfo(providedUserId, {
+                last_submit_on: prevValue["last_submit_on"],
                 is_banned: true,
                 ban_reason: reason
             })
-            await interaction.reply(`User \`${userId}\` has been BANNED for: \`${reason}\``)
+            await interaction.reply(`User \`${providedUserId}\` has been BANNED for: \`${reason}\``)
         }
 
         async function unban() {
-            const userId = interaction.options.getString("user_id")
-            await postSubmitUserInfo(userId, {
-                last_submit_on: 0,
+            const info = await getSubmitUserInfo(providedUserId)
+            let prevValue = {
+                last_submit_on: info ? info["last_submit_on"] : 0,
+            }
+
+            await postSubmitUserInfo(providedUserId, {
+                last_submit_on: prevValue["last_submit_on"],
                 is_banned: false,
                 ban_reason: ""
             })
-            await interaction.reply(`User \`${userId}\` has been unbanned!`)
+            await interaction.reply(`User \`${providedUserId}\` has been unbanned!`)
+        }
+
+        async function clearTimeout() {
+            const info = await getSubmitUserInfo(providedUserId)
+            let prevValue = {
+                is_banned: info ? info["is_banned"] : false,
+                ban_reason: info ? info["ban_reason"] : "",
+            }
+
+            await postSubmitUserInfo(providedUserId, {
+                last_submit_on: 0,
+                is_banned: prevValue["is_banned"],
+                ban_reason: prevValue["ban_reason"]
+            })
+            await interaction.reply(`Rate-limit for user \`${providedUserId}\` has been CLEARED!`)
         }
 
         switch (interaction.options.getSubcommand()) {
@@ -154,6 +186,9 @@ module.exports = {
                 break
             case "unban":
                 await unban()
+                break
+            case "clear_timeout":
+                await clearTimeout()
                 break
         }
     }
