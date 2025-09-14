@@ -1,8 +1,16 @@
 const sharp = require('sharp');
+const { fileTypeFromFile } = require("file-type")
 const { getDiscordUser, getSubmitUserInfo, postSubmitUserInfo } = require('../helper');
 const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client} = require('discord.js')
 const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 const cooldown = 1 * 60 * 60 * 1000 // 1 hour / person
+
+const allowedImageTypes = new Set([
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/bmp'
+]);
 
 /**
  * @param {string | undefined} str
@@ -54,10 +62,21 @@ async function validateSubmit(req) {
         return "Size for image exceeded 2MB!"
     }
 
-    const imageMetadata = await sharp(imageFile.path).metadata()
-    if (imageMetadata.width > 1024 || imageMetadata.height > 1024) {
-        return "Dimension for image exceeded 1024x1024!"
+    try {
+        const type = await fileTypeFromFile(imageFile.path)
+
+        if (!type || !allowedImageTypes.has(type.mime)) {
+            return "Invalid file type! (only png, jpg, jpeg, webp, or bmp are allowed)"
+        }
+
+        const imageMetadata = await sharp(imageFile.path).metadata()
+        if (imageMetadata.width > 1024 || imageMetadata.height > 1024) {
+            return "Dimension for image exceeded 1024x1024!"
+        }
+    } catch (e) {
+        return "Problem while processing uploaded file. " + e
     }
+
     return null
 }
 
