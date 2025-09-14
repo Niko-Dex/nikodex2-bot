@@ -162,7 +162,7 @@ async function upload(req, res, client) {
         sentEmbed.awaitMessageComponent({ filter, time: 7 * 24 * 60 * 60 * 1000 })
             .then(async componentInp => {
                 const accepted = componentInp.customId === 'accept'
-                await componentInp.update({ content: `This niko was ${accepted ? "accepted" : "denied"}!`, components: [] })
+                await componentInp.update({ content: `This niko was ${accepted ? "accepted" : "denied"} by <@${componentInp.user.id}>!`, components: [] })
                 await dmUser.dmChannel.send(`Your nikosona was ${accepted ? "accepted" : "denied"}: ${req.fields['name']}`)
             })
             .catch(e => {
