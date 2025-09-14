@@ -117,8 +117,8 @@ async function upload(req, res, client) {
 
     let abilitiesFields = []
     if (req.fields['abilities']) {
-        for (const element of abilities) {
-            abilitiesFields.push({ name: 'Ability', value: element })
+        for (let i = 0; i < abilities.length; i++) {
+            abilitiesFields.push({ name: `Ability #${i + 1}`, value: abilities[i] })
         }
     }
 
