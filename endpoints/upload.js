@@ -56,9 +56,9 @@ async function validateSubmit(req) {
         return "Total length for all abilities exceeded 500 bytes!"
     }
 
-    // validate image (max 2MB, max dimension of 1024x1024)
+    // validate image (max 2MB, max dimension of 256x256)
     const imageFile = req.files['files[0]']
-    if (imageFile.size > 2 * 1024 * 1024) {
+    if (imageFile.size > 2 * 256 * 256) {
         return "Size for image exceeded 2MB!"
     }
 
@@ -70,8 +70,8 @@ async function validateSubmit(req) {
         }
 
         const imageMetadata = await sharp(imageFile.path).metadata()
-        if (imageMetadata.width > 1024 || imageMetadata.height > 1024) {
-            return "Dimension for image exceeded 1024x1024!"
+        if (imageMetadata.width > 256 || imageMetadata.height > 256) {
+            return "Dimension for image exceeded 256x256!"
         }
     } catch (e) {
         return "Problem while processing uploaded file. " + e
