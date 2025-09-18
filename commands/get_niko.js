@@ -16,7 +16,7 @@ module.exports = {
         try {
             const niko = interaction.options.getString("nikosona");
             const reslist = await fetch(`${apiUri}/nikos/name?name=${niko}`);
-            const res = reslist.at(0);
+            const res = reslist[0];
             const resJson = await res.json();
             if (res.status > 299) {
                 await interaction.editReply(`Result is not OK: HTTP ${res.status}`);
