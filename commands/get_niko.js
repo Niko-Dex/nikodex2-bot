@@ -7,12 +7,12 @@ module.exports = {
         .setName('getniko')
         .setDescription('Replies with details of that Nikosona!')
         .addStringOption(o => o
-                .setName("niko")
-                .setDescription("The name of the niko you want to get.")
-                .setRequired(true)
+            .setName("nikosona")
+            .setDescription("The name of the Nikosona you want to get.")
+            .setRequired(true)
         ),
     async execute(interaction) {
-        const niko = interaction.options.getString("niko");
+        const niko = interaction.options.getString("nikosona");
         await interaction.reply("Let me try to find them..");
         try {
             const res = await fetch(`${apiUri}/nikos/name?${niko}`);
