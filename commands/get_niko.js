@@ -12,7 +12,7 @@ module.exports = {
                 .setRequired(true)
         ),
     async execute(interaction) {
-        const niko = interaction.options.getString("user_id");
+        const niko = interaction.options.getString("niko");
         await interaction.reply("Let me try to find them..");
         try {
             const res = await fetch(`${apiUri}/nikos/name?${niko}`);
