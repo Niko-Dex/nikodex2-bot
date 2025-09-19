@@ -51,7 +51,7 @@ module.exports = {
 
             embed = embed.addFields(fields)
 
-            await interaction.editReply({ content: 'Found one!', embeds: [embed], files: [file] });
+            await interaction.editReply({ content: 'Niko found!', embeds: [embed], files: [file] });
         } catch (error) {
             console.log(`Error: ${error}`);
             await interaction.editReply(`There was an error in TWM!`);
