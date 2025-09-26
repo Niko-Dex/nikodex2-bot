@@ -122,16 +122,16 @@ async function upload(req, res, client) {
         }
     }
 
-    const originalFileName = req.files['files[0]'].name;
+    const image = await sharp(req.files['files[0]'].path).toFormat("png").toBuffer()
+    let file = new AttachmentBuilder(image)
+        .setName("image.png")
 
-    let file = new AttachmentBuilder(req.files['files[0]'].path);
-    file.setName(originalFileName)
     let embed = new EmbedBuilder()
         .setTitle(`Submission: ${req.fields['name']}`)
         .setDescription(req.fields['full_desc'])
         .addFields({ name: 'Author', value: `${user['username']} (${user['id']})` })
         .addFields({ name: 'Short Description', value: `${req.fields['description']}` })
-        .setImage(`attachment://${originalFileName}`)
+        .setImage(`attachment://image.png`)
 
     embed = embed.addFields(abilitiesFields);
 
