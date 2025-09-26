@@ -58,7 +58,7 @@ async function validateSubmit(req) {
 
     // validate image (max 2MB, max dimension of 256x256)
     const imageFile = req.files['files[0]']
-    if (imageFile.size > 2 * 256 * 256) {
+    if (imageFile.size > 2 * 1024 * 1024) {
         return "Size for image exceeded 2MB!"
     }
 
