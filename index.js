@@ -16,7 +16,7 @@ app.use(cors())
 app.use(formidable())
 const port = process.env.PORT
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, 'GuildMessagePolls'] });
 client.commands = new Collection();
 
 client.on("clientReady", async () => {
