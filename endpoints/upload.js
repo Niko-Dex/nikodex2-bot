@@ -154,8 +154,8 @@ pollAnswers = [{ text: 'Yes', emoji: '🟩' },{ text: 'No', emoji: '🟥' }];
     try {
         const dmUser = await client.users.fetch(user['id'])
         const sentEmbed = await client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
-            .send({ embeds: [embed], files: [file], components: [actionRow] })
-            .send({poll: {question: [pollQuestion]}, answers: [pollAnswers], allowMultiselect: false, duration: 24, layoutType: PollLayoutType.Default})
+            .send({ embeds: [embed], files: [file], components: [actionRow] }, { poll: {question: [pollQuestion]}, answers: [pollAnswers], allowMultiselect: false, duration: 24, layoutType: PollLayoutType.Default})
+    
         await postSubmitUserInfo(user["id"], {
             "last_submit_on": Date.now(),
             "is_banned": false,
