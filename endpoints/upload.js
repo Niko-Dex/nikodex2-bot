@@ -1,7 +1,7 @@
 const sharp = require('sharp');
 const { fileTypeFromFile } = require("file-type")
 const { getDiscordUser, getSubmitUserInfo, postSubmitUserInfo } = require('../helper');
-const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client} = require('discord.js')
+const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, PollLayoutType} = require('discord.js')
 const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 const cooldown = 1 * 60 * 60 * 1000 // 1 hour / person
 
@@ -148,10 +148,24 @@ async function upload(req, res, client) {
     const actionRow = new ActionRowBuilder()
         .addComponents(acceptButton, denyButton)
 
+    const poll = {
+        poll: {
+            question: { text: 'Should we add this Niko?' },
+            answers: [
+                { text: 'Yes', emoji: '🟩' },
+                { text: 'No', emoji: '🟥' },
+            ],
+        allowMultiselect: false,
+        duration: 24,
+        layoutType: PollLayoutType.Default,
+        }
+    }
+
     try {
         const dmUser = await client.users.fetch(user['id'])
         const sentEmbed = await client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
             .send({ embeds: [embed], files: [file], components: [actionRow] })
+            .send(poll)
         await postSubmitUserInfo(user["id"], {
             "last_submit_on": Date.now(),
             "is_banned": false,
