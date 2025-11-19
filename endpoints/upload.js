@@ -148,24 +148,14 @@ async function upload(req, res, client) {
     const actionRow = new ActionRowBuilder()
         .addComponents(acceptButton, denyButton)
 
-    const poll = {
-        poll: {
-            question: { text: 'Should we add this Niko?' },
-            answers: [
-                { text: 'Yes', emoji: '🟩' },
-                { text: 'No', emoji: '🟥' },
-            ],
-        allowMultiselect: false,
-        duration: 24,
-        layoutType: PollLayoutType.Default,
-        }
-    }
+pollQuestion = { text: 'Should we add this Niko?' };
+pollAnswers = [{ text: 'Yes', emoji: '🟩' },{ text: 'No', emoji: '🟥' }];
 
     try {
         const dmUser = await client.users.fetch(user['id'])
         const sentEmbed = await client.channels.cache.get(process.env['SUBMISSIONS_CHANNEL'])
             .send({ embeds: [embed], files: [file], components: [actionRow] })
-            .send(poll)
+            .send({poll: {question: [pollQuestion]}, answers: [pollAnswers], allowMultiselect: false, duration: 24, layoutType: PollLayoutType.Default})
         await postSubmitUserInfo(user["id"], {
             "last_submit_on": Date.now(),
             "is_banned": false,
