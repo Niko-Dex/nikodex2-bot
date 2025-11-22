@@ -9,6 +9,7 @@ const express = require('express')
 const cors = require('cors')
 const formidable = require('express-formidable');
 const { upload } = require('./endpoints/upload');
+const { reqMigration } = require('./endpoints/reqMigration');
 const { registerCommands } = require('./deploy-commands');
 
 const app = express()
@@ -52,6 +53,10 @@ app.get('/', (req, res) => {
 
 app.post('/upload', async (req, res) => {
     await upload(req, res, client)
+})
+
+app.post('/req_migrate', async (req, res) => {
+    await reqMigration(req, res, client)
 })
 
 app.listen(port, () => {
