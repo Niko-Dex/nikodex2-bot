@@ -20,7 +20,7 @@ module.exports = {
 
             const blobRes = await fetch(`${apiUri}/image?id=${resJson['id']}`);
             if (blobRes.status > 299) {
-                await interaction.editReply(`Result is not OK: HTTP ${res.status}`);
+                await interaction.editReply(`Result is not OK: HTTP ${blobRes.status}`);
                 return;
             }
             const blob = await blobRes.blob();
@@ -37,7 +37,7 @@ module.exports = {
                 .setTitle(resJson['name'])
                 .setDescription(resJson['description'])
                 .addFields(
-                    { name: 'Author', value: `${resJson['author']}` },
+                    { name: 'Author', value: `${resJson['author_name']}` },
                     { name: 'Full Description', value: `${resJson['full_desc']}` }
                 )
                 .setThumbnail(`attachment://file.jpg`)
