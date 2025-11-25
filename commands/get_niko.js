@@ -42,7 +42,7 @@ module.exports = {
                 .setTitle(resJson['name'])
                 .setDescription(resJson['description'])
                 .addFields(
-                    { name: 'Author', value: `${resJson['author']}` },
+                    { name: 'Author', value: `${resJson['author_name']}` },
                     { name: 'Full Description', value: `${resJson['full_desc']}` }
                 )
                 .setThumbnail(`attachment://file.jpg`)
