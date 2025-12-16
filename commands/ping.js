@@ -6,5 +6,6 @@ module.exports = {
         .setDescription('Replies with pong!'),
     async execute(interaction) {
         await interaction.reply("Pong!");
+        console.log("'/ping' at" + interaction.guild.id);
     }
 }
