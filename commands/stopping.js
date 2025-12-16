@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, MessageFlags, EmbedBuilder } = require('discord.js');
 const adminIdList = process.env.ADMIN_ID_LIST.split(';')
 const { getSubmitUserInfo, postSubmitUserInfo } = require("../helper")
-const { frontendProcess, backendProcess } = require("../command/starting")
+const { frontendProcess, backendProcess } = require("../commands/starting")
 
 module.exports = {
     data: new SlashCommandBuilder()
