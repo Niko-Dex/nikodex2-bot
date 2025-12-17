@@ -27,23 +27,6 @@ module.exports = {
             return
         }
 
-        const providedUserId = interaction.options.getString("user_id")
-        const userRes = await fetch(`https://discord.com/api/v9/users/${providedUserId}`, {
-            headers: {
-                Authorization: `Bot ${process.env["DISCORD_TOKEN"]}`
-            }
-        })
-
-        if (!userRes.ok) {
-            await interaction.reply({
-                content: "Unknown Discord user!",
-                flags: [ MessageFlags.Ephemeral ]
-            })
-            return
-        }
-
-        const userInfo = await userRes.json()
-
         async function frontend() {
             const frontendProcess = spawn(`cmd /k ${process.env["FRONTEND_START_PATH"]}`, [], { detached: true, shell: true});
         }

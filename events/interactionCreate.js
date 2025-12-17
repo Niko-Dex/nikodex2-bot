@@ -17,8 +17,8 @@ module.exports = {
             }
 
             try {
-                await command.execute(interaction);
                 console.log("'/" + interaction.commandName + "' at " + interaction.guild.name + "(" + interaction.guild.id + ")" + " in " + interaction.channel.name + "(" + interaction.channel.id + ")" + " from " + interaction.user.username + "(" + interaction.user.id + ")");
+                await command.execute(interaction);
             } catch (error) {
                 console.error(error);
             }

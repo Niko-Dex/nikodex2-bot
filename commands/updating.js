@@ -4,7 +4,7 @@ const { exec, spawn } = require('node:child_process');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('website')
+        .setName('update')
         .setDescription('Updates either the backend or frontend')
         .addSubcommand(s => s
             .setName("frontend")
@@ -27,28 +27,13 @@ module.exports = {
             return
         }
 
-        const providedUserId = interaction.options.getString("user_id")
-        const userRes = await fetch(`https://discord.com/api/v9/users/${providedUserId}`, {
-            headers: {
-                Authorization: `Bot ${process.env["DISCORD_TOKEN"]}`
-            }
-        })
-
-        if (!userRes.ok) {
-            await interaction.reply({
-                content: "Unknown Discord user!",
-                flags: [ MessageFlags.Ephemeral ]
-            })
-            return
-        }
-
-        const userInfo = await userRes.json()
-
         async function frontend() {
             const frontendUpdater = spawn(`${process.env["FRONTEND_UPDATE_PATH"]}`, [], { detached: true, shell: true});
+            frontendUpdater.unref()
         }
         async function backend() {
             const backendUpdater = spawn(`${process.env["BACKEND_UPDATE_PATH"]}`, [], { detached: true, shell: true});
+            backendUpdater.unref()
         }
 
         switch (interaction.options.getSubcommand()) {
