@@ -56,9 +56,8 @@ async function audit(req, res, client) {
             res.send("Successful Niko Audit!");
           });
       } catch {
-        channel.setFooter({ text: "Couldn't retrieve niko image!" });
         channel.send({ embeds: [embed] });
-        res.send("Audit OK, But Image failure.");
+        res.send("Audit OK, No Image.");
       }
     } else {
       channel.send({ embeds: [embed] });
