@@ -11,7 +11,7 @@ const formidable = require("express-formidable");
 const { reqMigration } = require("./endpoints/reqMigration");
 const { audit } = require("./endpoints/audit");
 const { registerCommands } = require("./deploy-commands");
-import { bootstrap } from "global-agent";
+const { bootstrap } = require("global-agent");
 const { ProxyAgent, setGlobalDispatcher } = require("undici");
 
 
