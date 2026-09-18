@@ -11,12 +11,14 @@ const formidable = require("express-formidable");
 const { reqMigration } = require("./endpoints/reqMigration");
 const { audit } = require("./endpoints/audit");
 const { registerCommands } = require("./deploy-commands");
+import { bootstrap } from "global-agent";
 const { ProxyAgent, setGlobalDispatcher } = require("undici");
 
 
 if (process.env.PROXY !== undefined)
 {
-    setGlobalDispatcher(new ProxyAgent({uri: process.env.PROXY}))
+    bootstrap();
+    setGlobalDispatcher(new ProxyAgent(process.env.PROXY))
 }
 
 const app = express();
