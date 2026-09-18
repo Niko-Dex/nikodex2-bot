@@ -11,35 +11,24 @@ const formidable = require("express-formidable");
 const { reqMigration } = require("./endpoints/reqMigration");
 const { audit } = require("./endpoints/audit");
 const { registerCommands } = require("./deploy-commands");
-const { ProxyAgent } = require("undici");
+const { ProxyAgent, setGlobalDispatcher } = require("undici");
 const { bootstrap } = require('global-agent'); 
+
 
 if (process.env.PROXY !== undefined)
 {
     bootstrap();
     global.GLOBAL_AGENT.HTTP_PROXY = process.env.PROXY;
+    setGlobalDispatcher(new ProxyAgent(proxyServer))
 }
-
 
 const app = express();
 app.use(cors());
 app.use(formidable());
 const port = process.env.PORT;
-
-let client;
-if (process.env.PROXY !== undefined)
-{
-    client = new Client({
+const client = new Client({
         intents: [GatewayIntentBits.Guilds, "GuildMessagePolls"],
-        rest: {
-            agent: new ProxyAgent(process.env.PROXY)
-        }
-    })
-} else {
-    client = new Client({
-        intents: [GatewayIntentBits.Guilds, "GuildMessagePolls"],
-    });
-}
+});
 client.commands = new Collection();
 
 client.on("clientReady", async () => {
