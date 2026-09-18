@@ -12,14 +12,11 @@ const { reqMigration } = require("./endpoints/reqMigration");
 const { audit } = require("./endpoints/audit");
 const { registerCommands } = require("./deploy-commands");
 const { ProxyAgent, setGlobalDispatcher } = require("undici");
-const { bootstrap } = require('global-agent'); 
 
 
 if (process.env.PROXY !== undefined)
 {
-    bootstrap();
-    global.GLOBAL_AGENT.HTTP_PROXY = process.env.PROXY;
-    setGlobalDispatcher(new ProxyAgent(process.env.PROXY))
+    setGlobalDispatcher(new ProxyAgent({uri: process.env.PROXY}))
 }
 
 const app = express();
