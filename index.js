@@ -8,7 +8,6 @@ const token = process.env.DISCORD_TOKEN
 const express = require('express')
 const cors = require('cors')
 const formidable = require('express-formidable');
-const { upload } = require('./endpoints/upload');
 const { reqMigration } = require('./endpoints/reqMigration');
 const { audit } = require('./endpoints/audit');
 const { registerCommands } = require('./deploy-commands');
