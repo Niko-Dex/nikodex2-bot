@@ -30,6 +30,10 @@ client.commands = new Collection();
 
 client.on("clientReady", async () => {
   await registerCommands();
+
+  app.listen(port, () => {
+    console.log(`[Nikodex2-bot] Bot's server listening on port ${port}`);
+  });
 });
 
 const commandsFolder = path.join(__dirname, "commands");
@@ -71,10 +75,6 @@ app.post("/req_migrate", async (req, res) => {
 
 app.post("/audit", async (req, res) => {
   await audit(req, res, client);
-});
-
-app.listen(port, () => {
-  console.log(`[Nikodex2-bot] Bot's server listening on port ${port}`);
 });
 
 client.login(token);
