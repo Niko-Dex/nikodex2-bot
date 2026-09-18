@@ -11,7 +11,7 @@ module.exports = {
         await interaction.reply("Looking for the Niko..");
         try {
             const niko = interaction.options.getString("nikosona");
-            const res =  await fetch(`https://nikodex.net/api/data/random_notd`);
+            const res =  await fetch(`${process.env.ORIGIN}/api/data/random_notd`);
             const resJson = await res.json();
             if (res.status > 299) {
                 await interaction.editReply(`Result is not OK: HTTP ${res.status}`);
