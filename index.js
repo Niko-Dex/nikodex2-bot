@@ -1,71 +1,94 @@
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 dotenv.config();
-const fs = require('node:fs')
-const path = require('node:path')
+const fs = require("node:fs");
+const path = require("node:path");
 
-const { Client, GatewayIntentBits, Collection, Events } = require('discord.js')
-const token = process.env.DISCORD_TOKEN
-const express = require('express')
-const cors = require('cors')
-const formidable = require('express-formidable');
-const { upload } = require('./endpoints/upload');
-const { reqMigration } = require('./endpoints/reqMigration');
-const { audit } = require('./endpoints/audit');
-const { registerCommands } = require('./deploy-commands');
+const { Client, GatewayIntentBits, Collection, Events } = require("discord.js");
+const token = process.env.DISCORD_TOKEN;
+const express = require("express");
+const cors = require("cors");
+const formidable = require("express-formidable");
+const { reqMigration } = require("./endpoints/reqMigration");
+const { audit } = require("./endpoints/audit");
+const { registerCommands } = require("./deploy-commands");
+const { ProxyAgent } = require("undici");
+const { bootstrap } = require('global-agent'); 
 
-const app = express()
-app.use(cors())
-app.use(formidable())
-const port = process.env.PORT
+if (process.env.PROXY !== undefined)
+{
+    bootstrap();
+    global.GLOBAL_AGENT.HTTP_PROXY = process.env.PROXY;
+}
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, 'GuildMessagePolls'] });
+
+const app = express();
+app.use(cors());
+app.use(formidable());
+const port = process.env.PORT;
+
+let client;
+if (process.env.PROXY !== undefined)
+{
+    client = new Client({
+        intents: [GatewayIntentBits.Guilds, "GuildMessagePolls"],
+        rest: {
+            agent: new ProxyAgent(process.env.PROXY)
+        }
+    })
+} else {
+    client = new Client({
+        intents: [GatewayIntentBits.Guilds, "GuildMessagePolls"],
+    });
+}
 client.commands = new Collection();
 
 client.on("clientReady", async () => {
-    await registerCommands()
-})
+  await registerCommands();
+});
 
-const commandsFolder = path.join(__dirname, 'commands');
-const commands = fs.readdirSync(commandsFolder).filter(file => file.endsWith('.js'));
+const commandsFolder = path.join(__dirname, "commands");
+const commands = fs
+  .readdirSync(commandsFolder)
+  .filter((file) => file.endsWith(".js"));
 
 for (const file of commands) {
-    const filePath = path.join(commandsFolder, file);
-    const command = require(filePath)
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
-    }
+  const filePath = path.join(commandsFolder, file);
+  const command = require(filePath);
+  if ("data" in command && "execute" in command) {
+    client.commands.set(command.data.name, command);
+  }
 }
 
-const eventsFolder = path.join(__dirname, "events")
-const events = fs.readdirSync(eventsFolder).filter(file => file.endsWith('.js'))
+const eventsFolder = path.join(__dirname, "events");
+const events = fs
+  .readdirSync(eventsFolder)
+  .filter((file) => file.endsWith(".js"));
 for (const file of events) {
-    const filePath = path.join(eventsFolder, file)
-    const event = require(filePath)
-    if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args))
-    } else {
-        client.on(event.name, (...args) => event.execute(...args))
-    }
+  const filePath = path.join(eventsFolder, file);
+  const event = require(filePath);
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args));
+  }
 }
 
-app.get('/', (req, res) => {
-    res.send('The NikodexV2 discord bot is running on this port. This is NOT the frontend!')
-})
+app.get("/", (req, res) => {
+  res.send(
+    "The NikodexV2 discord bot is running on this port. This is NOT the frontend!",
+  );
+});
 
-app.post('/upload', async (req, res) => {
-    await upload(req, res, client)
-})
+app.post("/req_migrate", async (req, res) => {
+  await reqMigration(req, res, client);
+});
 
-app.post('/req_migrate', async (req, res) => {
-    await reqMigration(req, res, client)
-})
-
-app.post('/audit', async (req, res) => {
-    await audit(req, res, client)
-})
+app.post("/audit", async (req, res) => {
+  await audit(req, res, client);
+});
 
 app.listen(port, () => {
-  console.log(`[Nikodex2-bot] Bot's server listening on port ${port}`)
-})
+  console.log(`[Nikodex2-bot] Bot's server listening on port ${port}`);
+});
 
-client.login(token)
+client.login(token);
