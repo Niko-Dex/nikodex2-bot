@@ -19,7 +19,7 @@ if (process.env.PROXY !== undefined)
 {
     bootstrap();
     global.GLOBAL_AGENT.HTTP_PROXY = process.env.PROXY;
-    setGlobalDispatcher(new ProxyAgent(proxyServer))
+    setGlobalDispatcher(new ProxyAgent(process.env.PROXY))
 }
 
 const app = express();
